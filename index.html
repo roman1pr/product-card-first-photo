@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Первое фото карточки</title>
+<style>
+  :root {
+    --paper: #f3f0e8;
+    --ink: #1a1814;
+    --muted: #6e675e;
+    --line: #d9d1c6;
+    --soft: #e8e2d6;
+    --mark: #143d52;
+    --preview: #8d8478;
+    --low: #a6843a;
+    --full: #1e6a45;
+    --other: #143d52;
+    --logo: #8d3a32;
+    --cross: #6d5a3a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); }
+  body {
+    font-family: "Avenir Next", "Helvetica Neue", sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    padding: 28px 32px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  h1 {
+    font-family: "Iowan Old Style", Palatino, Georgia, serif;
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.15;
+    margin: 0 0 6px;
+  }
+  .lede { margin: 0; color: var(--muted); max-width: 44rem; }
+  .problem {
+    padding: 22px 32px 18px;
+    border-bottom: 1px solid var(--line);
+    max-width: 52rem;
+  }
+  .problem h2 { font-size: 22px; margin: 0 0 8px; }
+  .problem p { margin: 0 0 10px; }
+  .problem p:last-child { margin: 0; }
+  .modes { display: flex; border: 1px solid var(--ink); }
+  .modes button {
+    appearance: none;
+    background: transparent;
+    color: var(--ink);
+    border: 0;
+    border-right: 1px solid var(--ink);
+    padding: 8px 14px;
+    font: inherit;
+    cursor: pointer;
+  }
+  .modes button:last-child { border-right: 0; }
+  .modes button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .take-bar { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin: 0 0 12px; }
+  .compare .take-bar { flex-direction: column; align-items: center; }
+  .compare .take-bar label { width: min(320px, 100%); }
+  .compare .open-modes button { white-space: nowrap; }
+  .open-modes { display: flex; border: 1px solid var(--ink); }
+  .open-modes button {
+    appearance: none;
+    background: transparent;
+    color: var(--ink);
+    border: 0;
+    border-right: 1px solid var(--ink);
+    padding: 6px 12px;
+    font: inherit;
+    cursor: pointer;
+  }
+  .open-modes button:last-child { border-right: 0; }
+  .open-modes button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .product-name { margin: 0; color: var(--muted); }
+  main { display: grid; grid-template-columns: 268px 1fr; min-height: calc(100vh - 96px); }
+  main.compare-mode { grid-template-columns: 1fr; }
+  nav { border-right: 1px solid var(--line); padding: 12px 0 28px; }
+  nav button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-left: 3px solid transparent;
+    color: var(--ink);
+    font: inherit;
+    padding: 11px 16px 11px 13px;
+    cursor: pointer;
+  }
+  nav button small { display: block; color: var(--muted); margin-top: 2px; }
+  nav button[aria-current="true"] { border-left-color: var(--mark); background: var(--soft); }
+  article, .compare { padding: 22px 32px 56px; }
+  h2 {
+    font-family: "Iowan Old Style", Palatino, Georgia, serif;
+    font-weight: 400;
+    font-size: 26px;
+    margin: 0 0 8px;
+  }
+  .summary { margin: 0 0 18px; max-width: 46rem; }
+  .stage { display: grid; grid-template-columns: minmax(240px, 390px) 1fr; gap: 28px; align-items: start; }
+  video {
+    width: 100%;
+    background: #111;
+    display: block;
+  }
+  .clip-note { color: var(--muted); margin: 8px 0 0; }
+  .chapters, .transport { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+  button.chip, .pair button, .transport button {
+    font: inherit;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  .transport button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .missing {
+    min-height: 180px;
+    border: 1px solid var(--line);
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    padding: 16px;
+    text-align: center;
+  }
+  .diagram {
+    border-top: 1px solid var(--line);
+    padding-top: 8px;
+  }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  .diagram figcaption, .legend { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; }
+  .legend i {
+    display: inline-block;
+    width: 18px;
+    height: 8px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 28px; }
+  h3 {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin: 0 0 10px;
+  }
+  ul { margin: 0; padding-left: 1.1rem; }
+  li + li { margin-top: 8px; }
+  ol.reqs { list-style: none; margin: 0; padding: 0; counter-reset: req; }
+  ol.reqs li {
+    padding: 10px 0 10px 28px;
+    border-top: 1px solid var(--line);
+    position: relative;
+    counter-increment: req;
+  }
+  ol.reqs li::before {
+    content: counter(req);
+    position: absolute;
+    left: 0;
+    top: 10px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  ol.reqs li strong { display: block; font-weight: 600; }
+  ol.reqs li span { color: var(--muted); }
+  .extra { margin-top: 28px; padding-top: 8px; border-top: 1px solid var(--line); }
+  .center-col { width: min(640px, 86vw); }
+  .shared-time { display: flex; justify-content: center; align-items: center; gap: 14px; }
+  .shared-time b { font-size: 32px; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .play-btn {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .play-btn[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .play-btn svg { width: 18px; height: 18px; fill: currentColor; }
+  .play-btn .icon-pause { display: none; }
+  .play-btn[aria-pressed="true"] .icon-play { display: none; }
+  .play-btn[aria-pressed="true"] .icon-pause { display: block; }
+  .scrub { width: 100%; margin: 4px 0 10px; accent-color: var(--mark); }
+  .pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 0 0 8px;
+  }
+  .pair label { color: var(--muted); display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+  select {
+    font: inherit;
+    width: 100%;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    padding: 6px 10px;
+  }
+  .bench {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) auto minmax(240px, 1fr);
+    gap: 18px;
+    align-items: start;
+    margin-top: 14px;
+  }
+  .phones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    column-gap: 18px;
+    row-gap: 8px;
+    align-items: start;
+  }
+  .phone-col {
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: span 3;
+    min-width: 0;
+  }
+  .phone-col h2 { font-size: 20px; margin: 0; align-self: end; }
+  .phone-col video, .phone-col .missing { width: 100%; }
+  .rail { min-width: 0; }
+  .plot { position: relative; }
+  .ticks { position: relative; height: 16px; margin-left: 164px; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .ticks span { position: absolute; transform: translateX(-50%); }
+  .vlines { position: absolute; left: 164px; right: 0; top: 0; bottom: 0; pointer-events: none; }
+  .vline { position: absolute; top: 14px; bottom: 0; width: 1px; }
+  .vline span { position: absolute; top: -13px; left: 3px; font-size: 11px; font-weight: 650; }
+  .call { display: grid; grid-template-columns: 18px 88px 36px 1fr; gap: 6px; align-items: center; height: 24px; }
+  .wave {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 650; color: #fff;
+  }
+  .call b { font-weight: 600; font-size: 13px; }
+  .call .dur { font-variant-numeric: tabular-nums; font-size: 13px; }
+  .track { position: relative; height: 10px; background: rgba(26, 24, 20, 0.08); border-radius: 99px; }
+  .track i { position: absolute; top: 0; height: 100%; border-radius: 99px; background: var(--ink); }
+  .rail.right .track i { background: var(--full); }
+  .vlines .play { position: absolute; top: 14px; bottom: 0; width: 1px; background: var(--mark); }
+  .steps { margin-top: 10px; }
+  .step { display: grid; grid-template-columns: 92px 52px 1fr; gap: 6px; align-items: baseline; padding: 4px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .step b { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .step em { font-style: normal; font-variant-numeric: tabular-nums; }
+  .step em.fast { color: var(--full); }
+  .step em.slow { color: var(--logo); }
+  .chart-head { display: flex; gap: 18px; align-items: baseline; margin: 22px 0 6px; }
+  .chart-head h3 { margin: 0; letter-spacing: 0; text-transform: none; font-size: 18px; color: var(--ink); font-family: "Iowan Old Style", Palatino, Georgia, serif; font-weight: 400; }
+  .chart-head span { color: var(--muted); font-size: 14px; }
+  .swatch { display: inline-block; width: 18px; height: 3px; margin-right: 6px; vertical-align: middle; }
+  .side-by-side { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 28px; }
+  .side-by-side h2 { font-size: 22px; }
+  .side-by-side video { width: min(320px, 100%); }
+  .sync-note { color: var(--muted); margin: 8px 0 0; }
+  footer.note { color: var(--muted); font-size: 13px; margin-top: 28px; }
+    @media (max-width: 980px) {
+    main, .stage, .columns, .side-by-side, .bench, .pair, .phones { grid-template-columns: 1fr; }
+    .phones { grid-template-rows: none; }
+    .phone-col { display: block; grid-row: auto; }
+    .center-col { width: min(360px, 100%); }
+    .phone-col { width: min(360px, 100%); }
+    nav { border-right: 0; border-bottom: 1px solid var(--line); }
+    header, article, .compare, .problem { padding-left: 16px; padding-right: 16px; }
+    header { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Первое фото карточки</h1>
+    <p class="lede">Шкала у всех роликов от одного момента: карточка начинает въезжать. iOS — Dev, iPhone 17 Pro, шлюз PROD. Android — Dev 4.102, Pixel 7, UAT. «Сравнить» ведёт оба ролика по этой шкале.</p>
+  </div>
+  <div class="modes" role="group" aria-label="Режим">
+    <button type="button" id="mode-one" aria-pressed="true">Один вариант</button>
+    <button type="button" id="mode-two" aria-pressed="false">Сравнить</button>
+  </div>
+</header>
+<section class="problem">
+  <h2>Почему первое фото долго</h2>
+  <p>Сейчас первое фото карточки появляется поздно. До ответа <b>product</b> на его месте скелетон: картинка из каталога не показывается, даже если ячейка её уже скачала.</p>
+  <p>Дальше мешают тяжёлые запросы и их порядок. Кадр не стартует, пока не вернётся <b>product</b>. Маленький размер и полный идут друг за другом. В ту же очередь встают рекомендации, отзывы, вопросы и аксессуары, и сеть занята не фотографией.</p>
+  <p>Ниже — варианты того, когда первое фото уже видно. Полная загрузка карточки здесь не цель.</p>
+</section>
+<main>
+  <nav id="index" aria-label="Варианты"></nav>
+  <div id="panel"></div>
+</main>
+<script>
+const C = { preview:"#8d8478", low:"#a6843a", full:"#1e6a45", other:"#143d52", logo:"#8d3a32", cross:"#6d5a3a" };
+const AXIS = 8;
+
+const variants = [
+  {
+    id: "dev",
+    code: "1",
+    title: "Оригинал Dev",
+    short: "Скелетон до product",
+    summary: "Гость, Dev 4.105.0, iPhone 17 Pro. Ноль шкалы — кадр, где карточка уже въезжает, а не список и не заставка. Пока фото нет, на месте кадра скелетон. Длительности запросов в этих дублях не записывались.",
+    video: null,
+    takes: [
+      {
+        mode: "catalog", product: "jacket", productName: "Пуховик Columbia Oak Harbor II",
+        video: "shots/dev-catalog-jacket.mp4", align: 2.0,
+        videoNote: "Ноль — въезд карточки, 2,0 с файла. До этого на экране список. Цена 19 999 ₽ уже на карточке, фото скелетон. Фото на 3,0 с шкалы (5,0 с файла).",
+        chapters: [[2.0, "Въезд"], [5.0, "Фото"]],
+        marks: { data: 0, photo: 3.0, full: 3.0 },
+        lanes: [
+          { name: "Кадр", bars: [{ from: 0, to: 3.0, label: "Скелетон", color: "logo" }, { from: 3.0, to: 8, label: "Фото", color: "full" }] },
+          { name: "На экране", marks: [{ at: 0, label: "Карточка" }, { at: 3.0, label: "Фото" }] }
+        ]
+      },
+      {
+        mode: "catalog", product: "boots", productName: "Ботинки Columbia Firecamp",
+        video: "shots/dev-catalog-boots.mp4", align: 1.4,
+        videoNote: "Ноль — въезд карточки, 1,4 с файла. До этого поиск. Фото ботинка на 4,1 с шкалы (5,5 с файла).",
+        chapters: [[1.4, "Въезд"], [5.5, "Фото"]],
+        marks: { data: 0, photo: 4.1, full: 4.1 },
+        lanes: [
+          { name: "Кадр", bars: [{ from: 0, to: 4.1, label: "Скелетон", color: "logo" }, { from: 4.1, to: 8, label: "Фото", color: "full" }] },
+          { name: "На экране", marks: [{ at: 0, label: "Карточка" }, { at: 4.1, label: "Фото" }] }
+        ]
+      },
+      {
+        mode: "catalog", product: "puma", productName: "Кроссовки PUMA St Runner V4",
+        video: "shots/dev-catalog-puma.mp4", align: 1.2,
+        videoNote: "Ноль — въезд карточки, 1,2 с файла. До этого поиск. Фото кроссовка на 3,2 с шкалы (4,4 с файла).",
+        chapters: [[1.2, "Въезд"], [4.4, "Фото"]],
+        marks: { data: 0, photo: 3.2, full: 3.2 },
+        lanes: [
+          { name: "Кадр", bars: [{ from: 0, to: 3.2, label: "Скелетон", color: "logo" }, { from: 3.2, to: 8, label: "Фото", color: "full" }] },
+          { name: "На экране", marks: [{ at: 0, label: "Карточка" }, { at: 3.2, label: "Фото" }] }
+        ]
+      },
+      {
+        mode: "cold", product: "jacket", productName: "Пуховик Columbia Oak Harbor II",
+        video: "shots/dev-deeplink-jacket.mp4", align: 1.8,
+        videoNote: "Ноль — въезд карточки, 1,8 с файла. До этого заставка. Скелетон до фото на 3,2 с шкалы (5,0 с файла).",
+        chapters: [[1.8, "Въезд"], [5.0, "Фото"]],
+        marks: { data: 0, photo: 3.2, full: 3.2 },
+        lanes: [
+          { name: "Кадр", bars: [{ from: 0, to: 3.2, label: "Скелетон", color: "logo" }, { from: 3.2, to: 8, label: "Фото", color: "full" }] },
+          { name: "На экране", marks: [{ at: 0, label: "Карточка" }, { at: 3.2, label: "Фото" }] }
+        ]
+      },
+      {
+        mode: "cold", product: "boots", productName: "Ботинки Columbia Firecamp",
+        video: "shots/dev-deeplink-boots.mp4", align: 1.3,
+        videoNote: "Ноль — въезд карточки, 1,3 с файла. До этого заставка. Фото на 3,1 с шкалы (4,4 с файла).",
+        chapters: [[1.3, "Въезд"], [4.4, "Фото"]],
+        marks: { data: 0, photo: 3.1, full: 3.1 },
+        lanes: [
+          { name: "Кадр", bars: [{ from: 0, to: 3.1, label: "Скелетон", color: "logo" }, { from: 3.1, to: 8, label: "Фото", color: "full" }] },
+          { name: "На экране", marks: [{ at: 0, label: "Карточка" }, { at: 3.1, label: "Фото" }] }
+        ]
+      },
+      {
+        mode: "cold", product: "puma", productName: "Кроссовки PUMA St Runner V4",
+        video: "shots/dev-deeplink-puma.mp4", align: 1.1,
+        videoNote: "Ноль — въезд карточки, 1,1 с файла. До этого заставка. Фото на 3,1 с шкалы (4,2 с файла).",
+        chapters: [[1.1, "Въезд"], [4.2, "Фото"]],
+        marks: { data: 0, photo: 3.1, full: 3.1 },
+        lanes: [
+          { name: "Кадр", bars: [{ from: 0, to: 3.1, label: "Скелетон", color: "logo" }, { from: 3.1, to: 8, label: "Фото", color: "full" }] },
+          { name: "На экране", marks: [{ at: 0, label: "Карточка" }, { at: 3.1, label: "Фото" }] }
+        ]
+      },
+      {
+        mode: "cache", product: "jacket", productName: "Пуховик Columbia Oak Harbor II",
+        video: "shots/dev-cache-jacket.mp4", align: 2.5,
+        videoNote: "Ноль — въезд карточки, 2,5 с файла. До этого каталог. Кэш после холодного диплинка не чистился. Фото на 1,8 с шкалы (4,3 с файла).",
+        chapters: [[2.5, "Въезд"], [4.3, "Фото"]],
+        marks: { data: 0, photo: 1.8, full: 1.8 },
+        lanes: [
+          { name: "Кадр", bars: [{ from: 0, to: 1.8, label: "Скелетон", color: "logo" }, { from: 1.8, to: 8, label: "Фото", color: "full" }] },
+          { name: "На экране", marks: [{ at: 0, label: "Карточка" }, { at: 1.8, label: "Фото" }] }
+        ]
+      }
+    ],
+    steps: [
+      "Скелетон, пока нет ответа product",
+      "Битмап листинга сразу, либо маленький URL и затем полный",
+      "Рекомендации после полного кадра",
+      "Снятие скелетона пересобирает карусель: на кадр вспыхивает логотип"
+    ],
+    changes: [
+      "До product медиа-секция вызывает displaySkeleton: Lottie и логотип. Превью ячейки каталога на карточку не переносится.",
+      "Главное фото с политикой .restore. Ключ кэша — ImageUri.link, не готовый URL с шириной и высотой.",
+      "Битмап найден: он ставится сразу, полный URL качается поверх, текущая картинка не очищается.",
+      "Битмапа нет: loadsCatalogThumbnailFirst качает URL размера ячейки каталога, затем URL размера карточки. Рекомендации стартуют после полного кадра.",
+      "Снятие isSkeletonLoading входит в shouldReload. Карусель пересобирается, prepareForReuse вызывает styler.clear(), и на кадр вспыхивает логотип."
+    ],
+    requests: [
+      ["POST /v2/products/{id} и POST /v3/products/{id}/availability", "Стартуют вместе с открытием карточки."],
+      ["CDN-картинка", "До product запроса нет. Дальше либо сразу полный размер, либо размер каталога и затем полный."],
+      ["POST /v3/products/recs", "После onMediaLoaded полного кадра. Если у товара нет фото, рекомендации уходят сразу."]
+    ]
+  },
+  {
+    id: "catalog-same",
+    code: "2а",
+    product: "kappa",
+    productName: "Пуховик Kappa",
+    title: "Каталог, затем то же фото",
+    short: "Превью остаётся и резчеет",
+    summary: "С открытия на карточке уже кадр из каталога. Ответ product приносит ту же ссылку: карусель не перезагружается, кадр остаётся, поверх догружается полный размер.",
+    video: "open-from-catalog-image.mp4",
+    align: 4.0,
+    videoNote: "Пуховик Kappa. 4,0 с — карточка въезжает, кадр каталога уже на ней. 4,4 с — карточка встала. 9,0 с — кнопка «Похожие». Отдельный скачок резкости в этом дубле не выделен.",
+    chapters: [[4.0, "Въезд"], [4.4, "Кадр каталога"], [9.0, "Похожие"]],
+    lanes: [
+      { name: "Кадр", bars: [{ from: 0, to: 8, label: "Тот же кадр", color: "full" }] },
+      { name: "На экране", marks: [
+        { at: 0, label: "Фото уже есть" },
+        { at: 0.4, label: "Цена" },
+        { at: 5.0, label: "Похожие" }
+      ]}
+    ],
+    marks: { data: 0.4, photo: 0, full: 0 },
+    calls: [
+      { name: "product", start: 0, dur: 0.4 },
+      { name: "availability", start: 0, dur: 0.4 },
+      { name: "hero", start: 0, dur: 0.15 },
+      { name: "recs", start: 0.4, dur: 4.6 }
+    ],
+    changes: [
+      "Пока product в пути, ячейка рисует битмап листинга, если медиа уже есть. Скелетон остаётся только для пустого списка.",
+      "Ссылки совпали: секция не пересобирается. Видимая ячейка обновляется на месте, styler.clear() не вызывается.",
+      "Дальше один запрос полного размера той же ссылки. Пока он идёт, на экране остаётся кадр каталога.",
+      "Рекомендации ждут полный кадр и остаются последним запросом."
+    ],
+    requests: [
+      ["Маленький URL ячейки каталога", "Уже скачан в листинге, до открытия карточки. Битмап лежит в памяти по ImageUri.link."],
+      ["POST /v2/products/{id} и POST /v3/products/{id}/availability", "Вместе, с открытия."],
+      ["CDN полного размера той же ссылки", "После product. Другого фото нет."],
+      ["POST /v3/products/recs", "После полного кадра. В ролике «Похожие» появляется на 5,0 с шкалы."]
+    ]
+  },
+  {
+    id: "catalog-swap",
+    code: "2б",
+    product: "northland",
+    productName: "Пуховик Northland",
+    title: "Каталог, затем другое фото",
+    short: "Кроссфейд 0,55 с",
+    summary: "Сначала на карточке превью каталога. Когда product приносит другое изображение, оно сменяет первое кроссфейдом. Логотип в этот момент не вспыхивает.",
+    video: "open-photo-replacement-no-blink.mp4",
+    align: 6.8,
+    videoNote: "Пуховик Northland. 6,8 с — въезд с боковым кадром каталога. 7,2 с — карточка встала. К 8,4 с (1,6 с шкалы) боковой кадр сменён фронтальным. Кроссфейд 0,55 с, примерно с 7,85 с.",
+    chapters: [[6.8, "Въезд"], [7.2, "Кадр каталога"], [7.8, "Начало смены"], [8.4, "Другое фото"]],
+    lanes: [
+      { name: "Кадр", bars: [
+        { from: 0, to: 1.05, label: "Превью", color: "preview" },
+        { from: 1.05, to: 1.6, label: "0,55 с", color: "cross" },
+        { from: 1.6, to: 8, label: "Другое фото", color: "other" }
+      ]},
+      { name: "На экране", marks: [
+        { at: 0.4, label: "Цена" },
+        { at: 1.6, label: "Второе фото" }
+      ]}
+    ],
+    marks: { data: 0.4, photo: 0, full: 1.6 },
+    calls: [
+      { name: "product", start: 0, dur: 0.4 },
+      { name: "availability", start: 0, dur: 0.4 },
+      { name: "hero", start: 0.4, dur: 1.2 },
+      { name: "recs", start: 1.6, dur: 0 }
+    ],
+    changes: [
+      "До product на экране первое фото галереи из кэша каталога.",
+      "В этом дубле героем после product назначено второе фото галереи, чтобы замена была видна. В текущем исходнике эта подмена выключена.",
+      "Смена идёт через UIView.transition, crossDissolve, 0,55 с. Первое изображение остаётся до конца перехода.",
+      "onMediaLoaded и рекомендации срабатывают после завершения перехода.",
+      "Моргание в раннем дубле давало снятие скелетона: shouldReload перезагружал карусель, clear() ставил пустой URL."
+    ],
+    requests: [
+      ["Маленький URL первого фото", "Скачан ячейкой каталога до открытия."],
+      ["POST /v2/products/{id} и POST /v3/products/{id}/availability", "Вместе, с открытия."],
+      ["CDN полного размера второго фото", "После product. Это другой файл, не более крупная версия первого. На экране он с 1,6 с шкалы."],
+      ["POST /v3/products/recs", "После конца кроссфейда."]
+    ]
+  },
+  {
+    id: "product-upscale",
+    code: "3",
+    product: "northland",
+    productName: "Пуховик Northland",
+    title: "Только из product, затем апскейл",
+    short: "Сначала маленький URL товара",
+    summary: "Кадр каталога на карточку не переносится. После product качается URL размера ячейки каталога по ссылке из ответа, затем URL размера карточки. Рекомендации уходят после полного кадра.",
+    video: "open-low-then-upscale.mp4",
+    align: 6.8,
+    videoNote: "Тот же Northland, кэш Kingfisher очищен. 6,8 с — въезд. 7,2–7,6 с — логотип. 7,9 с — мягкий кадр. 10,0 с — резкий. Резкость кадра на полном разрешении: 290, затем 515.",
+    chapters: [[6.8, "Въезд"], [7.2, "Логотип"], [7.9, "Низкое"], [10.0, "Полное"]],
+    lanes: [
+      { name: "Кадр", bars: [
+        { from: 0.4, to: 1.1, label: "Логотип", color: "logo" },
+        { from: 1.1, to: 3.2, label: "Низкое", color: "low" },
+        { from: 3.2, to: 8, label: "Полное", color: "full" }
+      ]},
+      { name: "На экране", marks: [
+        { at: 0.4, label: "Цена, ещё без фото" },
+        { at: 1.1, label: "Маленький файл" },
+        { at: 3.2, label: "Полный файл" }
+      ]}
+    ],
+    marks: { data: 0.4, photo: 1.1, full: 3.2 },
+    calls: [
+      { name: "product", start: 0, dur: 0.4 },
+      { name: "availability", start: 0, dur: 0.4 },
+      { name: "thumb", start: 0.4, dur: 0.7 },
+      { name: "hero", start: 1.1, dur: 2.1 },
+      { name: "recs", start: 3.2, dur: 0 }
+    ],
+    changes: [
+      "Битмап листинга не рисуется. Источник кадра — media ответа product.",
+      "Первый URL собирается размером ячейки каталога, второй — размером карточки. Ссылка одна и та же, меняется только размер.",
+      "Пока полный файл в пути, на экране остаётся маленький кадр.",
+      "На ролике перед маленьким кадром около половины секунды виден логотип: дисковый кэш пустой, маленький файл качается заново.",
+      "Отдельный замер того же пути, товар 30975450299, 19 ноября: product около 0,9 с, маленький кадр ещё около 2,4 с, полный ещё около 2,9 с, рекомендации вместе с полным. Это другой прогон, не тайминг ролика."
+    ],
+    requests: [
+      ["POST /v2/products/{id} и POST /v3/products/{id}/availability", "Вместе, с открытия. Картинки до ответа нет. В ролике цена есть с 0,4 с шкалы, фото ещё нет."],
+      ["CDN размера каталога по ссылке из product", "Первый запрос картинки. Мягкий кадр с 1,1 с шкалы."],
+      ["CDN полного размера той же ссылки", "Второй запрос. Резкий кадр с 3,2 с шкалы."],
+      ["POST /v3/products/recs", "После полного кадра."]
+    ]
+  },
+  {
+    id: "android-dev",
+    code: "A",
+    product: "jacket",
+    productName: "Пуховик Columbia Oak Harbor II",
+    title: "Android Dev",
+    short: "Превью из каталога, запросы вместе",
+    summary: "Сборка ru.sportmaster.app.dev 4.102.0-dev-google на Pixel 7, UAT, Москва. Пуховик Columbia Oak Harbor, тап по ячейке выдачи. На первом кадре карточки белый плейсхолдер, на следующем уже фото. product и availability уходят вместе и не блокируют этот кадр.",
+    video: "android-dev-catalog.mp4",
+    align: 1.35,
+    videoNote: "1,35 с — карточка, один кадр белый. 1,40 с — фото пуховика и дальше не меняется. Это другой прогон, не iOS: 18 ноября, UAT.",
+    chapters: [[1.35, "Въезд"], [1.4, "Фото"]],
+    lanes: [
+      { name: "Кадр", bars: [
+        { from: 0, to: 0.05, label: "Плейсхолдер", color: "logo" },
+        { from: 0.05, to: 8, label: "Фото", color: "full" }
+      ]},
+      { name: "На экране", marks: [
+        { at: 0.05, label: "Фото" },
+        { at: 1.3, label: "Цена" }
+      ]}
+    ],
+    marks: { data: 1.3, photo: 0.05, full: 0.05 },
+    calls: [
+      { name: "hero", start: 0.05, dur: 0 },
+      { name: "availability", start: 0.84, dur: 0.32 },
+      { name: "product", start: 0.86, dur: 0.53 }
+    ],
+    changes: [
+      "На записи между выдачей и фото один белый кадр. Превью ячейки на карточке не удерживается.",
+      "Фото стоит с 0,05 с шкалы, до ответа product. Отдельного апскейла в этом дубле нет.",
+      "Имя и цена в аналитике — через 1,3 с после onViewCreated. На шкале это момент «Цена».",
+      "availability 0,84 с (0,32 с) и product 0,86 с (0,53 с) стартуют вместе. Оба recs — в 1,17 и 1,19 с, следом отзывы, вопросы и аксессуары. Длительность recs в этом логе не записана. ai-compare не вызывался."
+    ],
+    requests: [
+      ["availability и product", "Вместе, с открытия страницы. availability 0,32 с, product 0,53 с. Источник — Chucker этого прогона."],
+      ["Фото", "На экране с 0,05 с шкалы. Сетевой длительности кадра в логе нет: картинка уже была у ячейки."],
+      ["recs, отзывы, вопросы, аксессуары", "Пачкой с 1,17–1,19 с. ai-compare в этой сборке не уходил."]
+    ]
+  }
+];
+
+const byId = Object.fromEntries(variants.map((v) => [v.id, v]));
+const OPEN_MODES = [["catalog", "Из каталога"], ["cold", "Без кэша"], ["cache", "Из кэша"]];
+let mode = "one";
+let current = "dev";
+let leftId = "dev";
+let rightId = "android-dev";
+let openMode = "catalog";
+let product = "jacket";
+let clock = 0;
+let playing = false;
+let raf = 0;
+let lastTick = 0;
+
+const indexEl = document.getElementById("index");
+const panel = document.getElementById("panel");
+
+function rel(v, absolute) { return Math.round((absolute - v.align) * 10) / 10; }
+
+function takesOf(v) {
+  if (v.takes) return v.takes;
+  return [{
+    mode: "catalog",
+    product: v.product,
+    productName: v.productName,
+    video: v.video,
+    align: v.align || 0,
+    marks: v.marks,
+    calls: v.calls,
+    lanes: v.lanes,
+    chapters: v.chapters,
+    videoNote: v.videoNote
+  }];
+}
+
+function screen(v) {
+  const take = takesOf(v).find((item) => item.mode === openMode && item.product === product);
+  const base = {
+    id: v.id,
+    code: v.code,
+    title: v.title,
+    short: v.short,
+    summary: v.summary,
+    changes: v.changes,
+    requests: v.requests,
+    steps: v.steps
+  };
+  if (!take) return { ...base, video: null, align: 0, videoNote: "Этого открытия для выбранного товара нет." };
+  return { ...base, ...take };
+}
+
+function productsIn(modeId) {
+  const found = new Map();
+  variants.forEach((variant) => {
+    takesOf(variant).forEach((take) => {
+      if (take.mode === modeId) found.set(take.product, take.productName);
+    });
+  });
+  return [...found.entries()];
+}
+
+function takeBar(strategy) {
+  const source = strategy ? takesOf(strategy) : variants.flatMap(takesOf);
+  const modes = OPEN_MODES.filter(([id]) => source.some((take) => take.mode === id));
+  const buttons = modes.map(([id, label]) =>
+    `<button type="button" data-mode="${id}" aria-pressed="${openMode === id ? "true" : "false"}">${label}</button>`
+  ).join("");
+  const products = strategy
+    ? takesOf(strategy).filter((take) => take.mode === openMode).map((take) => [take.product, take.productName])
+    : productsIn(openMode);
+  let productControl = "";
+  if (products.length > 1) {
+    const options = products.map(([id, name]) =>
+      `<option value="${id}" ${id === product ? "selected" : ""}>${name}</option>`
+    ).join("");
+    productControl = `<label>Товар <select id="pick-product">${options}</select></label>`;
+  } else if (products.length === 1) {
+    productControl = `<p class="product-name">${products[0][1]}</p>`;
+  }
+  return `<div class="take-bar"><div class="open-modes" role="group" aria-label="Открытие">${buttons}</div>${productControl}</div>`;
+}
+
+function diagram(v, playhead) {
+  if (!v.lanes) {
+    const title = v.video ? "Как устроена стратегия" : "Порядок, без ролика";
+    return `<div class="diagram"><h3>${title}</h3><ol class="reqs">${v.steps.map((s) => `<li><strong>${s}</strong></li>`).join("")}</ol></div>`;
+  }
+  const w = 640, h = 118, padL = 78, padR = 12, top = 16;
+  const inner = w - padL - padR;
+  const x = (s) => padL + Math.max(0, Math.min(AXIS, s)) / AXIS * inner;
+  const rows = v.lanes;
+  const rowH = 28;
+  let body = "";
+  rows.forEach((row, i) => {
+    const y = top + i * (rowH + 16);
+    body += `<text x="0" y="${y + 16}" fill="#6e675e" font-size="12" font-family="Avenir Next, Helvetica Neue, sans-serif">${row.name}</text>`;
+    (row.bars || []).forEach((bar) => {
+      const x0 = x(bar.from);
+      const x1 = x(bar.to);
+      body += `<rect x="${x0}" y="${y}" width="${Math.max(2, x1 - x0)}" height="22" fill="${C[bar.color]}"></rect>`;
+      if (x1 - x0 > 52) {
+        body += `<text x="${x0 + 6}" y="${y + 15}" fill="#f3f0e8" font-size="11" font-family="Avenir Next, Helvetica Neue, sans-serif">${bar.label}</text>`;
+      }
+    });
+    (row.marks || []).forEach((mark) => {
+      const mx = x(mark.at);
+      body += `<line x1="${mx}" y1="${y}" x2="${mx}" y2="${y + 22}" stroke="#1a1814" stroke-width="1.5"></line>`;
+      body += `<text x="${mx + 4}" y="${y + 15}" fill="#1a1814" font-size="11" font-family="Avenir Next, Helvetica Neue, sans-serif">${mark.label}</text>`;
+    });
+  });
+  for (let s = 0; s <= AXIS; s += 1) {
+    const mx = x(s);
+    body += `<line x1="${mx}" y1="${h - 16}" x2="${mx}" y2="${h - 12}" stroke="#6e675e"></line>`;
+    body += `<text x="${mx}" y="${h - 1}" text-anchor="middle" fill="#6e675e" font-size="11" font-family="Avenir Next, Helvetica Neue, sans-serif">${s}</text>`;
+  }
+  if (playhead != null && playhead >= 0 && playhead <= AXIS) {
+    const px = x(playhead);
+    body += `<line x1="${px}" y1="8" x2="${px}" y2="${h - 18}" stroke="#143d52" stroke-width="1.5"></line>`;
+  }
+  const caption = v.video
+    ? "Ноль — первый кадр въезда карточки. Полосы сняты с ролика. Засечки — то, что видно на экране, не длительность запроса."
+    : "";
+  return `<figure class="diagram">${svgWrap(w, h, body)}<figcaption>${caption}</figcaption></figure>`;
+}
+
+function svgWrap(w, h, body) {
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Шкала кадра от въезда карточки">${body}</svg>`;
+}
+
+function legend() {
+  const items = [
+    ["preview", "Превью каталога"],
+    ["low", "Низкое"],
+    ["full", "Полный кадр"],
+    ["other", "Другое фото"],
+    ["logo", "Логотип"],
+    ["cross", "Кроссфейд"]
+  ];
+  return `<p class="legend">${items.map(([k, name]) => `<span><i style="background:${C[k]}"></i>${name}</span>`).join("")}</p>`;
+}
+
+function videoBlock(v, id) {
+  if (!v.video) {
+    return `<div class="missing">Ролика этого варианта нет. Ниже поведение сборки Dev без локальных правок.</div>`;
+  }
+  const chapters = (v.chapters || []).map(([t, label]) =>
+    `<button type="button" class="chip" data-seek="${t}" data-video="${id}">${label} · ${fmt(t)} с</button>`
+  ).join("");
+  return `
+    <div>
+      <video id="${id}" controls playsinline preload="metadata" src="${v.video}"></video>
+      <p class="clip-note">${v.videoNote || ""}</p>
+      ${chapters ? `<div class="chapters">${chapters}</div>` : ""}
+    </div>`;
+}
+
+function changesBlock(v) {
+  return `<div><h3>Что меняется</h3><ul>${v.changes.map((t) => `<li>${t}</li>`).join("")}</ul></div>`;
+}
+
+function requestsBlock(v) {
+  return `<div><h3>Запросы</h3><ol class="reqs">${v.requests.map(([name, note]) =>
+    `<li><strong>${name}</strong><span>${note}</span></li>`
+  ).join("")}</ol></div>`;
+}
+
+function renderIndex() {
+  indexEl.hidden = mode !== "one";
+  document.querySelector("main").classList.toggle("compare-mode", mode !== "one");
+  indexEl.innerHTML = variants.map((v) => `
+    <button type="button" data-id="${v.id}" ${v.id === current ? 'aria-current="true"' : ""}>
+      ${v.code}. ${v.title}
+      <small>${v.short}</small>
+    </button>
+  `).join("");
+}
+
+function renderOne() {
+  const strategy = byId[current];
+  const v = screen(strategy);
+  panel.className = "";
+  panel.innerHTML = `
+    <article>
+      <h2>${v.code}. ${v.title}</h2>
+      ${takeBar(strategy)}
+      <p class="summary">${v.summary}</p>
+      <div class="stage">
+        ${videoBlock(v, "main-video")}
+        <div>
+          ${diagram(v, v.video ? 0 : null)}
+          ${v.lanes ? legend() : ""}
+        </div>
+      </div>
+      <div class="columns">
+        ${changesBlock(v)}
+        ${requestsBlock(v)}
+      </div>
+      <footer class="note">Оригинал Dev — гость, 4.105.0, секунды по кадрам раз в секунду. 2а, 2б и 3 — локальные правки и прежние ролики каталога. Android — каталог Oak Harbor, 4.102, UAT.</footer>
+    </article>`;
+  const video = document.getElementById("main-video");
+  if (video) {
+    const show = () => paintOne(v, video.currentTime - (v.align || 0));
+    video.addEventListener("timeupdate", show);
+    video.addEventListener("loadedmetadata", () => {
+      video.currentTime = v.align || 0;
+      show();
+    });
+  }
+}
+
+function paintOne(v, playhead) {
+  const host = panel.querySelector(".diagram");
+  if (!host || !v.lanes) return;
+  host.outerHTML = diagram(v, playhead);
+}
+
+const Y_DATA = 0.38;
+const Y_PHOTO = 0.7;
+const Y_FULL = 1;
+
+function loadSteps(data, photo, full) {
+  const milestones = [
+    { t: Math.max(0, data), y: Y_DATA },
+    { t: Math.max(0, photo), y: Y_PHOTO },
+    { t: Math.max(0, full), y: Y_FULL }
+  ];
+  const points = [{ t: 0, y: 0 }];
+  let held = 0;
+  milestones.forEach((event) => {
+    const t = Math.max(held, event.t);
+    const last = points[points.length - 1];
+    if (event.y <= last.y) {
+      held = t;
+      return;
+    }
+    if (t > last.t + 0.02) points.push({ t, y: last.y });
+    points.push({ t, y: event.y });
+    held = t;
+  });
+  return points;
+}
+
+function clipLoad(points, now) {
+  if (now <= 0) return [{ t: 0, y: 0 }];
+  const visible = [];
+  for (const point of points) {
+    if (point.t <= now) visible.push(point);
+    else {
+      const previous = visible[visible.length - 1] || { t: 0, y: 0 };
+      visible.push({ t: now, y: previous.y });
+      break;
+    }
+  }
+  const last = visible[visible.length - 1];
+  if (last && last.t < now) visible.push({ t: now, y: last.y });
+  return visible;
+}
+
+function phasesOf(calls) {
+  const sorted = [...calls].sort((a, b) => a.start - b.start || b.dur - a.dur);
+  const phases = [];
+  sorted.forEach((call) => {
+    const last = phases[phases.length - 1];
+    if (!last || call.start - last[0].start > 0.28) phases.push([call]);
+    else last.push(call);
+  });
+  return phases;
+}
+
+function chartTimes(marks) {
+  const data = Math.max(0, marks.data);
+  const photo = Math.max(data, Math.max(0, marks.photo));
+  const full = Math.max(photo, Math.max(0, marks.full));
+  return { data, photo, full };
+}
+
+function ratioText(a, b) {
+  const seconds = Math.abs(a - b);
+  if (seconds < 0.05) return null;
+  const low = Math.min(a, b);
+  const high = Math.max(a, b);
+  const label = low <= 0.02
+    ? "сразу"
+    : (high / low >= 10 ? `x${Math.round(high / low)}` : `x${(high / low).toFixed(1)}`);
+  return { label, seconds, slowerIsA: a > b };
+}
+
+const WAVE_COLOR = { 1: "#1a1814", 2: "#1e6a45", 3: "#8d3a32" };
+
+function waveOf(name) {
+  if (name === "product" || name === "availability") return 1;
+  if (name === "thumb" || name === "hero") return 2;
+  return 3;
+}
+
+function requestRail(v, side) {
+  if (!v.calls) {
+    const text = v.video
+      ? "Длительности запросов в этом дубле нет. Секунды в подписи сняты с кадров ролика."
+      : "Этого открытия в стратегии нет.";
+    return `<div class="rail ${side}"><p class="clip-note">${text}</p></div>`;
+  }
+  const rank = { product: 0, availability: 1, thumb: 2, hero: 3, recs: 4 };
+  const calls = [...v.calls].sort((a, b) =>
+    waveOf(a.name) - waveOf(b.name) || a.start - b.start || (rank[a.name] ?? 9) - (rank[b.name] ?? 9)
+  );
+  const ticks = Array.from({ length: AXIS + 1 }, (_, second) =>
+    `<span style="left:${(second / AXIS) * 100}%">${second}</span>`
+  ).join("");
+  const starts = new Map();
+  calls.forEach((call) => {
+    const key = call.start.toFixed(2);
+    if (!starts.has(key)) starts.set(key, new Set());
+    starts.get(key).add(waveOf(call.name));
+  });
+  const lines = [...starts.entries()].map(([key, waves]) => {
+    const left = (Number(key) / AXIS) * 100;
+    const color = WAVE_COLOR[[...waves].sort((a, b) => a - b)[0]] || "#1a1814";
+    return `<i class="vline" style="left:${left}%;background:${color}"></i>`;
+  }).join("");
+  const rows = calls.map((call) => {
+    const wave = waveOf(call.name);
+    const end = call.dur > 0 ? call.start + call.dur : AXIS;
+    const left = (call.start / AXIS) * 100;
+    const width = Math.max(((end - call.start) / AXIS) * 100, 0.8);
+    const dur = (end - call.start).toFixed(2);
+    return `<div class="call"><span class="wave" style="background:${WAVE_COLOR[wave]}">${wave}</span><b>${call.name}</b><span class="dur">${dur}</span><div class="track"><i style="left:${left}%;width:${width}%;background:${WAVE_COLOR[wave]}"></i></div></div>`;
+  }).join("");
+  const play = `<em class="play" style="left:${(clock / AXIS) * 100}%"></em>`;
+  return `<div class="rail ${side}"><div class="plot"><div class="ticks">${ticks}</div><div class="vlines">${lines}${play}</div>${rows}</div></div>`;
+}
+
+function stepsBlock(v, other) {
+  if (!v.marks) return `<div class="steps"><p class="clip-note">Разница в секундах появится вместе с роликом.</p></div>`;
+  const rows = [
+    ["Данные", v.marks.data, other.marks && other.marks.data],
+    ["Фото", v.marks.photo, other.marks && other.marks.photo],
+    ["Полное", v.marks.full, other.marks && other.marks.full]
+  ];
+  return `<div class="steps">${rows.map(([label, mine, theirs]) => {
+    const shown = clock + 0.02 >= mine;
+    let delta = "";
+    let kind = "";
+    if (shown && theirs != null && clock + 0.02 >= Math.max(mine, theirs)) {
+      const ratio = ratioText(mine, theirs);
+      if (!ratio) delta = "вместе";
+      else if (ratio.label === "сразу") {
+        kind = ratio.slowerIsA ? "slow" : "fast";
+        delta = ratio.slowerIsA ? `дольше на ${ratio.seconds.toFixed(1)} с` : `сразу, на ${ratio.seconds.toFixed(1)} с`;
+      } else {
+        kind = ratio.slowerIsA ? "slow" : "fast";
+        delta = `${ratio.slowerIsA ? "дольше" : "быстрее"} ${ratio.label} (${ratio.seconds.toFixed(1)} с)`;
+      }
+    }
+    return `<div class="step"><span>${label}</span><b>${shown ? `${fmt(mine)} с` : ""}</b><em class="${kind}">${delta}</em></div>`;
+  }).join("")}</div>`;
+}
+
+function phoneColumn(v, other, videoId) {
+  const player = v.video
+    ? `<video id="${videoId}" playsinline preload="metadata" src="${v.video}"></video>`
+    : `<div class="missing">Этого открытия в стратегии нет.</div>`;
+  return `<div class="phone-col" data-variant="${v.id}"><h2>${v.code}. ${v.title}</h2>${player}<div class="steps-host">${stepsBlock(v, other)}</div></div>`;
+}
+
+function sharedChart(left, right) {
+  const w = 1000, h = 250, padL = 92, padR = 16, padT = 16, padB = 28;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+  const scale = AXIS + 0.4;
+  const xOf = (t) => padL + (t / scale) * plotW;
+  const yOf = (level) => padT + (1 - level) * plotH;
+  const levels = [
+    [Y_FULL, "Полное фото"],
+    [Y_PHOTO, "Фото"],
+    [Y_DATA, "Данные"],
+    [0, "0"]
+  ];
+  const series = [];
+  if (left.marks) series.push({ name: left.code, color: "#1a1814", fill: "rgba(26,24,20,0.08)", points: clipLoad(loadSteps(left.marks.data, left.marks.photo, left.marks.full), Math.min(clock, scale)) });
+  if (right.marks) series.push({ name: right.code, color: "#1f6b4a", fill: "rgba(31,107,74,0.12)", points: clipLoad(loadSteps(right.marks.data, right.marks.photo, right.marks.full), Math.min(clock, scale)) });
+  const lineOf = (points) => points.map((point, index) => `${index ? "L" : "M"}${xOf(point.t).toFixed(1)} ${yOf(point.y).toFixed(1)}`).join(" ");
+  const areaOf = (points) => {
+    const last = points[points.length - 1];
+    const first = points[0];
+    return `${lineOf(points)} L${xOf(last.t).toFixed(1)} ${yOf(0)} L${xOf(first.t).toFixed(1)} ${yOf(0)} Z`;
+  };
+  let body = "";
+  levels.forEach(([level, label]) => {
+    body += `<line x1="${padL}" x2="${w - padR}" y1="${yOf(level)}" y2="${yOf(level)}" stroke="#d9d1c6"/>`;
+    body += `<text x="${padL - 8}" y="${yOf(level) + 4}" text-anchor="end" fill="#6e675e" font-size="13">${label}</text>`;
+  });
+  for (let second = 0; second <= AXIS; second += 1) {
+    body += `<line x1="${xOf(second)}" x2="${xOf(second)}" y1="${padT}" y2="${padT + plotH}" stroke="#e8e2d6"/>`;
+    body += `<text x="${xOf(second)}" y="${h - 8}" text-anchor="middle" fill="#6e675e" font-size="12">${second} с</text>`;
+  }
+  series.forEach((item) => { body += `<path d="${areaOf(item.points)}" fill="${item.fill}"/>`; });
+  [...series].reverse().forEach((item) => { body += `<path d="${lineOf(item.points)}" fill="none" stroke="${item.color}" stroke-width="3"/>`; });
+  if (left.marks && right.marks) {
+    const leftTimes = chartTimes(left.marks);
+    const rightTimes = chartTimes(right.marks);
+    [
+      [leftTimes.data, rightTimes.data, Y_DATA / 2],
+      [leftTimes.photo, rightTimes.photo, (Y_DATA + Y_PHOTO) / 2],
+      [leftTimes.full, rightTimes.full, (Y_PHOTO + Y_FULL) / 2]
+    ].forEach(([a, b, y]) => {
+      const ready = Math.max(a, b);
+      if (clock + 0.02 < ready) return;
+      const ratio = ratioText(a, b);
+      if (!ratio) return;
+      const gainRight = b < a;
+      const color = gainRight ? "#1f6b4a" : "#8d3a32";
+      const x1 = xOf(Math.min(a, b));
+      const x2 = xOf(Math.max(a, b));
+      const yy = yOf(y);
+      body += `<line x1="${x1}" x2="${x2}" y1="${yy}" y2="${yy}" stroke="${color}" stroke-width="1.5"/>`;
+      body += `<text x="${(x1 + x2) / 2}" y="${yy - 6}" text-anchor="middle" fill="${color}" font-size="13" font-weight="650">${ratio.label} (${ratio.seconds.toFixed(1)} с)</text>`;
+    });
+  }
+  if (clock >= 0 && clock <= scale) {
+    body += `<line x1="${xOf(clock)}" x2="${xOf(clock)}" y1="${padT}" y2="${padT + plotH}" stroke="#143d52" stroke-width="1.5"/>`;
+  }
+  const legendBits = series.map((item) => `<span><i class="swatch" style="background:${item.color}"></i>${item.name}</span>`).join("");
+  return `<div class="chart-head"><h3>Загруженность</h3><span>время → насколько карточка уже загружена</span>${legendBits}</div><svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Общая диаграмма двух вариантов">${body}</svg><p class="legend">До «Данные» линия не поднимается: product и availability ещё идут. Подпись x — во сколько раз один вариант дольше на этом уровне.</p>`;
+}
+
+function renderCompare() {
+  playing = false;
+  cancelAnimationFrame(raf);
+  const options = variants.map((v) =>
+    `<option value="${v.id}">${v.code}. ${v.title}</option>`
+  ).join("");
+  const left = screen(byId[leftId]);
+  const right = screen(byId[rightId]);
+  const playable = left.video || right.video;
+  panel.className = "compare";
+  panel.innerHTML = `
+    <div class="bench">
+      <div id="rail-left"></div>
+      <div class="center-col">
+        <div class="shared-time">
+          <button type="button" id="play-both" class="play-btn" aria-pressed="false" aria-label="Играть оба с нуля" ${playable ? "" : "disabled"}><svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6L14 8z"/></svg><svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2h3.2v12H3zm6.8 0H13v12H9.8z"/></svg></button>
+          <b id="clock-label">${fmt(clock)} с</b>
+        </div>
+        <input id="scrub" class="scrub" type="range" min="0" max="${AXIS}" step="0.05" value="${clock}" ${playable ? "" : "disabled"} aria-label="Общий таймер">
+        ${takeBar(null)}
+        <div class="pair">
+          <label>Слева <select id="pick-left">${options}</select></label>
+          <label>Справа <select id="pick-right">${options}</select></label>
+        </div>
+        <div class="phones">
+          ${phoneColumn(left, right, "video-left")}
+          ${phoneColumn(right, left, "video-right")}
+        </div>
+      </div>
+      <div id="rail-right"></div>
+    </div>
+    <div id="shared-chart"></div>
+    <div class="side-by-side">
+      <section><h2>${left.code}. ${left.title}</h2>${changesBlock(left)}</section>
+      <section><h2>${right.code}. ${right.title}</h2>${changesBlock(right)}</section>
+    </div>`;
+  document.getElementById("pick-left").value = leftId;
+  document.getElementById("pick-right").value = rightId;
+  ["video-left", "video-right"].forEach((id, i) => {
+    const video = document.getElementById(id);
+    const v = screen(byId[i === 0 ? leftId : rightId]);
+    if (!video || !v.video) return;
+    video.addEventListener("loadedmetadata", () => placeVideo(video, v));
+  });
+  seekShared(clock, false);
+}
+
+function fmt(n) {
+  return (Math.round(n * 10) / 10).toFixed(1).replace(".", ",");
+}
+
+function placeVideo(video, v) {
+  if (!video || !v.video || video.readyState < 1) return;
+  const target = v.align + clock;
+  if (Math.abs(video.currentTime - target) > 0.3) video.currentTime = target;
+}
+
+function seekShared(t, shouldPlay) {
+  clock = Math.max(0, Math.min(AXIS, t));
+  ["video-left", "video-right"].forEach((id, i) => {
+    const v = screen(byId[i === 0 ? leftId : rightId]);
+    const video = document.getElementById(id);
+    if (!video || !v.video) return;
+    placeVideo(video, v);
+    if (shouldPlay) video.play().catch(() => {});
+    else video.pause();
+  });
+  const scrub = document.getElementById("scrub");
+  const label = document.getElementById("clock-label");
+  if (scrub) scrub.value = String(clock);
+  if (label) label.textContent = `${fmt(clock)} с`;
+  paintCompare();
+}
+
+function paintCompare() {
+  const left = screen(byId[leftId]);
+  const right = screen(byId[rightId]);
+  const railL = document.getElementById("rail-left");
+  const railR = document.getElementById("rail-right");
+  const chart = document.getElementById("shared-chart");
+  if (railL) railL.outerHTML = `<div id="rail-left">${requestRail(left, "left")}</div>`;
+  if (railR) railR.outerHTML = `<div id="rail-right">${requestRail(right, "right")}</div>`;
+  document.querySelectorAll(".steps-host").forEach((host) => {
+    const id = host.closest("[data-variant]").dataset.variant;
+    const v = screen(byId[id]);
+    const other = v.id === leftId ? right : left;
+    host.innerHTML = stepsBlock(v, other);
+  });
+  if (chart) chart.innerHTML = sharedChart(left, right);
+}
+
+function tick(now) {
+  if (!playing) return;
+  if (!lastTick) lastTick = now;
+  clock += (now - lastTick) / 1000;
+  lastTick = now;
+  if (clock >= AXIS) {
+    clock = AXIS;
+    playing = false;
+    document.getElementById("play-both")?.setAttribute("aria-pressed", "false");
+  }
+  seekShared(clock, playing);
+  if (playing) raf = requestAnimationFrame(tick);
+}
+
+function render() {
+  document.querySelector(".problem").hidden = mode !== "one";
+  renderIndex();
+  if (mode === "one") renderOne();
+  else renderCompare();
+}
+
+document.getElementById("mode-one").onclick = () => {
+  mode = "one";
+  playing = false;
+  document.getElementById("mode-one").setAttribute("aria-pressed", "true");
+  document.getElementById("mode-two").setAttribute("aria-pressed", "false");
+  render();
+};
+document.getElementById("mode-two").onclick = () => {
+  mode = "two";
+  document.getElementById("mode-one").setAttribute("aria-pressed", "false");
+  document.getElementById("mode-two").setAttribute("aria-pressed", "true");
+  render();
+};
+
+panel.addEventListener("click", (event) => {
+  const seek = event.target.closest("[data-seek]");
+  if (seek) {
+    const video = document.getElementById(seek.dataset.video);
+    if (!video) return;
+    video.currentTime = Number(seek.dataset.seek);
+    video.play();
+    return;
+  }
+  const modeButton = event.target.closest("[data-mode]");
+  if (modeButton) {
+    openMode = modeButton.dataset.mode;
+    keepProduct();
+    clock = 0;
+    render();
+    return;
+  }
+  const playButton = event.target.closest("#play-both");
+  if (playButton) {
+    playing = !playing;
+    playButton.setAttribute("aria-pressed", playing ? "true" : "false");
+    playButton.setAttribute("aria-label", playing ? "Пауза" : "Играть оба с нуля");
+    if (playing) {
+      clock = 0;
+      lastTick = 0;
+      seekShared(0, true);
+      raf = requestAnimationFrame(tick);
+    } else {
+      cancelAnimationFrame(raf);
+      seekShared(clock, false);
+    }
+  }
+});
+
+panel.addEventListener("input", (event) => {
+  if (event.target.id !== "scrub") return;
+  playing = false;
+  cancelAnimationFrame(raf);
+  const button = document.getElementById("play-both");
+  if (button) {
+    button.setAttribute("aria-pressed", "false");
+    button.setAttribute("aria-label", "Играть оба с нуля");
+  }
+  seekShared(Number(event.target.value), false);
+});
+
+function keepProduct() {
+  const available = productsIn(openMode).map(([id]) => id);
+  if (!available.includes(product) && available.length) product = available[0];
+}
+
+panel.addEventListener("change", (event) => {
+  if (event.target.id === "pick-left") leftId = event.target.value;
+  if (event.target.id === "pick-right") rightId = event.target.value;
+  if (event.target.id === "pick-product") product = event.target.value;
+  if (event.target.id === "pick-left" || event.target.id === "pick-right" || event.target.id === "pick-product") {
+    clock = 0;
+    render();
+  }
+});
+
+indexEl.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-id]");
+  if (!button) return;
+  current = button.dataset.id;
+  if (mode === "one") {
+    const takes = takesOf(byId[current]);
+    const exact = takes.some((take) => take.mode === openMode && take.product === product);
+    if (!exact) {
+      const sameMode = takes.find((take) => take.mode === openMode);
+      if (sameMode) product = sameMode.product;
+      else if (takes[0]) {
+        openMode = takes[0].mode;
+        product = takes[0].product;
+      }
+    }
+  }
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
